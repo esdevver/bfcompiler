@@ -3,9 +3,8 @@
 #define BFC_SRC_INSTRUCTION_H_
 
 #include "containers.h"
-/*
-types of instruction
-  */
+
+/* types of instruction */
 typedef enum INSTRUCTION_TYPE {
   INSTRUCTION_LOOP,
   INSTRUCTION_MOVE,
