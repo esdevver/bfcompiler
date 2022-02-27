@@ -5,9 +5,9 @@
 #include "stdlib.h"
 
 typedef struct vector {
+  void **start;
   size_t length;
   size_t capacity;
-  void **start;
 } vector;
 
 void vector_init(vector *v);
