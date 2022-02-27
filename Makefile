@@ -22,5 +22,5 @@ hefty:
 
 .PHONY: clean
 clean:
-	rm -f $(OBJDIR) $(exe)
+	rm -rf $(OBJDIR) $(exe)
 
