@@ -7,7 +7,7 @@
 #include "instruction.h"
 
 void print_usage(char *program_name) {
-  printf("USAGE: %s FILE\n", program_name);
+  fprintf(stderr,"USAGE: %s FILE\n", program_name);
 }
 
 typedef enum STATUS { STATUS_LOOPEND, STATUS_EOF } STATUS;
