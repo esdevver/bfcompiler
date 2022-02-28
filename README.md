@@ -15,3 +15,20 @@ Compiler for BrainF
 - - [ ] C
 - - [ ] Python
 - - [ ] JavaScript
+
+### Building
+
+To build with plain output
+```bash
+make clean ; make
+```
+
+To build with color output
+```bash
+make clean ; CFLAGS=-DCOLOR_OUTPUT make
+```
+
+To build source files together without intermediate object files
+```bash
+make clean ; make hefty
+```
