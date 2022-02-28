@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "containers.h"
-#include "instruction.h"
+#include "syntax.h"
 
 void print_usage(char *program_name) {
   fprintf(stderr,"USAGE: %s FILE\n", program_name);
@@ -12,24 +12,24 @@ void print_usage(char *program_name) {
 
 typedef enum STATUS { STATUS_LOOPEND, STATUS_EOF } STATUS;
 
-STATUS read_brainf(FILE *source, vector *instruction_list) {
+STATUS read_brainf(FILE *source, vector *syntax_list) {
   char c;
-  instruction_unit_count *move;
-  instruction_unit_count *add;
-  instruction_unit_list *loop;
-  instruction_unit *io;
-  instruction_unit *last_instruction;
+  syntax_unit_count *move;
+  syntax_unit_count *add;
+  syntax_unit_list *loop;
+  syntax_unit *io;
+  syntax_unit *last_syntax;
   while ((c = fgetc(source)) != EOF) {
     if (strchr("[]<>-+.,", c) == NULL)
       continue;
-    last_instruction = vector_last(instruction_list);
+    last_syntax = vector_last(syntax_list);
     switch (c) {
     case '[':
-      loop = (instruction_unit_list *)malloc(sizeof(instruction_unit_list));
-      loop->type = INSTRUCTION_LOOP;
+      loop = (syntax_unit_list *)malloc(sizeof(syntax_unit_list));
+      loop->type = SYNTAX_LOOP;
       vector_init(&loop->list);
       vector_reserve(&loop->list, 4);
-      vector_push(instruction_list, loop);
+      vector_push(syntax_list, loop);
       if (read_brainf(source, &loop->list) == STATUS_EOF)
         return STATUS_EOF;
       break;
@@ -37,64 +37,64 @@ STATUS read_brainf(FILE *source, vector *instruction_list) {
       return STATUS_LOOPEND;
       break;
     case '<':
-      if (last_instruction != NULL &&
-          last_instruction->type == INSTRUCTION_MOVE) {
-        move = (instruction_unit_count *)last_instruction;
+      if (last_syntax != NULL &&
+          last_syntax->type == SYNTAX_MOVE) {
+        move = (syntax_unit_count *)last_syntax;
         move->count--;
       } else {
-        move = (instruction_unit_count *)malloc(sizeof(instruction_unit_count));
-        move->type = INSTRUCTION_MOVE;
+        move = (syntax_unit_count *)malloc(sizeof(syntax_unit_count));
+        move->type = SYNTAX_MOVE;
         move->count = -1;
-        vector_push(instruction_list, move);
+        vector_push(syntax_list, move);
       }
       break;
     case '>':
-      if (last_instruction != NULL &&
-          last_instruction->type == INSTRUCTION_MOVE) {
-        move = (instruction_unit_count *)last_instruction;
+      if (last_syntax != NULL &&
+          last_syntax->type == SYNTAX_MOVE) {
+        move = (syntax_unit_count *)last_syntax;
         move->count++;
       } else {
-        move = (instruction_unit_count *)malloc(sizeof(instruction_unit_count));
-        move->type = INSTRUCTION_MOVE;
+        move = (syntax_unit_count *)malloc(sizeof(syntax_unit_count));
+        move->type = SYNTAX_MOVE;
         move->count = 1;
-        vector_push(instruction_list, move);
+        vector_push(syntax_list, move);
       }
       break;
     case '-':
-      if (last_instruction != NULL &&
-          last_instruction->type == INSTRUCTION_ADD) {
-        add = (instruction_unit_count *)last_instruction;
+      if (last_syntax != NULL &&
+          last_syntax->type == SYNTAX_ADD) {
+        add = (syntax_unit_count *)last_syntax;
         add->count--;
         add->count &= 0xFF;
       } else {
-        add = (instruction_unit_count *)malloc(sizeof(instruction_unit_count));
-        add->type = INSTRUCTION_ADD;
+        add = (syntax_unit_count *)malloc(sizeof(syntax_unit_count));
+        add->type = SYNTAX_ADD;
         add->count = 255;
-        vector_push(instruction_list, add);
+        vector_push(syntax_list, add);
       }
       break;
     case '+':
-      if (last_instruction != NULL &&
-          last_instruction->type == INSTRUCTION_ADD) {
-        add = (instruction_unit_count *)last_instruction;
+      if (last_syntax != NULL &&
+          last_syntax->type == SYNTAX_ADD) {
+        add = (syntax_unit_count *)last_syntax;
         add->count++;
         add->count &= 0xFF;
       } else {
-        add = (instruction_unit_count *)malloc(sizeof(instruction_unit_count));
-        add->type = INSTRUCTION_ADD;
+        add = (syntax_unit_count *)malloc(sizeof(syntax_unit_count));
+        add->type = SYNTAX_ADD;
         add->count = 1;
-        vector_push(instruction_list, add);
+        vector_push(syntax_list, add);
       }
       break;
     case '.':
-      io = (instruction_unit *)malloc(sizeof(instruction_unit));
-      io->type = INSTRUCTION_OUT;
-      vector_push(instruction_list, io);
+      io = (syntax_unit *)malloc(sizeof(syntax_unit));
+      io->type = SYNTAX_OUT;
+      vector_push(syntax_list, io);
       break;
     case ',':
-      io = (instruction_unit *)malloc(sizeof(instruction_unit));
-      io->type = INSTRUCTION_IN;
-      vector_push(instruction_list, io);
+      io = (syntax_unit *)malloc(sizeof(syntax_unit));
+      io->type = SYNTAX_IN;
+      vector_push(syntax_list, io);
       break;
     }
   }
@@ -102,76 +102,76 @@ STATUS read_brainf(FILE *source, vector *instruction_list) {
 }
 
 #ifdef COLOR_OUTPUT
-#define PRETTY_INSTRUCTION(COLOR, INSTRUCTION)                                 \
-  printf("\x1b[38;5;%sm%s\x1b[0m\n", COLOR, INSTRUCTION)
-#define PRETTY_INSTRUCTION_COUNT(COLOR, INSTRUCTION, COUNT)                    \
+#define PRETTY_SYNTAX(COLOR, SYNTAX)                                 \
+  printf("\x1b[38;5;%sm%s\x1b[0m\n", COLOR, SYNTAX)
+#define PRETTY_SYNTAX_COUNT(COLOR, SYNTAX, COUNT)                    \
   printf("\x1b[38;5;%sm%s\x1b[0m \x1b[38;5;166m%d\x1b[0m\n", COLOR,            \
-         INSTRUCTION, COUNT)
+         SYNTAX, COUNT)
 #else
-#define PRETTY_INSTRUCTION(COLOR, INSTRUCTION) printf("%s\n", INSTRUCTION)
-#define PRETTY_INSTRUCTION_COUNT(COLOR, INSTRUCTION, COUNT)                    \
-  printf("%s %d\n", INSTRUCTION, COUNT)
+#define PRETTY_SYNTAX(COLOR, SYNTAX) printf("%s\n", SYNTAX)
+#define PRETTY_SYNTAX_COUNT(COLOR, SYNTAX, COUNT)                    \
+  printf("%s %d\n", SYNTAX, COUNT)
 #endif
 
-void print_syntax(vector *instruction_list, int indent) {
-  instruction_unit *instruction;
-  instruction_unit_count *move;
-  instruction_unit_count *add;
+void print_syntax(vector *syntax_list, int indent) {
+  syntax_unit *syntax;
+  syntax_unit_count *move;
+  syntax_unit_count *add;
   size_t i;
   int j;
-  for (i = 0; i < instruction_list->length; i++) {
-    instruction = vector_get(instruction_list, i);
+  for (i = 0; i < syntax_list->length; i++) {
+    syntax = vector_get(syntax_list, i);
     for (j = 0; j < indent; j++)
       printf("  ");
-    switch (instruction->type) {
-    case INSTRUCTION_LOOP:
-      PRETTY_INSTRUCTION("141", "LOOP");
-      print_syntax(&((instruction_unit_list *)instruction)->list, indent + 1);
+    switch (syntax->type) {
+    case SYNTAX_LOOP:
+      PRETTY_SYNTAX("141", "LOOP");
+      print_syntax(&((syntax_unit_list *)syntax)->list, indent + 1);
       break;
-    case INSTRUCTION_MOVE:
-      move = (instruction_unit_count *)instruction;
+    case SYNTAX_MOVE:
+      move = (syntax_unit_count *)syntax;
       if (move->count == 0)
-        PRETTY_INSTRUCTION("246", "NOP");
+        PRETTY_SYNTAX("246", "NOP");
       else if (move->count > 0) {
         if (move->count == 1)
-          PRETTY_INSTRUCTION("167", "RIGHT");
+          PRETTY_SYNTAX("167", "RIGHT");
         else
-          PRETTY_INSTRUCTION_COUNT("167", "RIGHT", move->count);
+          PRETTY_SYNTAX_COUNT("167", "RIGHT", move->count);
       } else {
         if (move->count == -1)
-          PRETTY_INSTRUCTION("167", "LEFT");
+          PRETTY_SYNTAX("167", "LEFT");
         else
-          PRETTY_INSTRUCTION_COUNT("167", "LEFT", -move->count);
+          PRETTY_SYNTAX_COUNT("167", "LEFT", -move->count);
       }
       break;
-    case INSTRUCTION_ADD:
-      add = (instruction_unit_count *)instruction;
+    case SYNTAX_ADD:
+      add = (syntax_unit_count *)syntax;
       if (add->count == 0)
-        PRETTY_INSTRUCTION("246", "NOP");
+        PRETTY_SYNTAX("246", "NOP");
       else if (add->count <= 128) {
-        PRETTY_INSTRUCTION_COUNT("221", "ADD", add->count);
+        PRETTY_SYNTAX_COUNT("221", "ADD", add->count);
       } else {
-        PRETTY_INSTRUCTION_COUNT("221", "SUB", 256 - add->count);
+        PRETTY_SYNTAX_COUNT("221", "SUB", 256 - add->count);
       }
       break;
-    case INSTRUCTION_OUT:
-      PRETTY_INSTRUCTION("116", "OUT");
+    case SYNTAX_OUT:
+      PRETTY_SYNTAX("116", "OUT");
       break;
-    case INSTRUCTION_IN:
-      PRETTY_INSTRUCTION("116", "IN");
+    case SYNTAX_IN:
+      PRETTY_SYNTAX("116", "IN");
       break;
     }
   }
 }
 
-#undef PRETTY_INSTRUCTION
-#undef PRETTY_INSTRUCTION_COUNT
+#undef PRETTY_SYNTAX
+#undef PRETTY_SYNTAX_COUNT
 
 int main(int argc, char *argv[]) {
 
   FILE *source;
   char *error_string;
-  vector instruction_list;
+  vector syntax_list;
 
   if (argc != 2) {
     print_usage(argv[0]);
@@ -190,12 +190,12 @@ int main(int argc, char *argv[]) {
 #undef ERROR_MESSAGE
   }
 
-  vector_init(&instruction_list);
-  vector_reserve(&instruction_list, 4);
+  vector_init(&syntax_list);
+  vector_reserve(&syntax_list, 4);
 
-  read_brainf(source, &instruction_list);
+  read_brainf(source, &syntax_list);
 
-  print_syntax(&instruction_list, 0);
+  print_syntax(&syntax_list, 0);
 
   return 0;
 }
