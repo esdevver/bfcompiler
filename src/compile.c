@@ -101,11 +101,17 @@ STATUS read_brainf(FILE *source, vector *instruction_list) {
   return STATUS_EOF;
 }
 
+#ifdef COLOR_OUTPUT
 #define PRETTY_INSTRUCTION(COLOR, INSTRUCTION)                                 \
   printf("\x1b[38;5;%sm%s\x1b[0m\n", COLOR, INSTRUCTION)
 #define PRETTY_INSTRUCTION_COUNT(COLOR, INSTRUCTION, COUNT)                    \
   printf("\x1b[38;5;%sm%s\x1b[0m \x1b[38;5;166m%d\x1b[0m\n", COLOR,            \
          INSTRUCTION, COUNT)
+#else
+#define PRETTY_INSTRUCTION(COLOR, INSTRUCTION) printf("%s\n", INSTRUCTION)
+#define PRETTY_INSTRUCTION_COUNT(COLOR, INSTRUCTION, COUNT)                    \
+  printf("%s %d\n", INSTRUCTION, COUNT)
+#endif
 
 void print_syntax(vector *instruction_list, int indent) {
   instruction_unit *instruction;

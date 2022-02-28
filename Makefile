@@ -4,7 +4,7 @@ OBJDIR := obj
 SRC := $(shell find src/* -type f -name '*.c')
 OBJ := $(SRC:%.c=$(OBJDIR)/%.o)
 
-CFLAGS := -ansi -O3 -Wall -Wextra -pedantic
+CFLAGS += -ansi -O3 -Wall -Wextra -pedantic
 
 exe := bfc
 
