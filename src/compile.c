@@ -19,6 +19,7 @@ STATUS read_brainf(FILE *source, vector *syntax_list) {
   syntax_unit_list *loop;
   syntax_unit *io;
   syntax_unit *last_syntax;
+  STATUS status;
   while ((c = fgetc(source)) != EOF) {
     if (strchr("[]<>-+.,", c) == NULL)
       continue;
@@ -30,7 +31,9 @@ STATUS read_brainf(FILE *source, vector *syntax_list) {
       vector_init(&loop->list);
       vector_reserve(&loop->list, 4);
       vector_push(syntax_list, loop);
-      if (read_brainf(source, &loop->list) == STATUS_EOF)
+      status = read_brainf(source, &loop->list);
+      vector_shink_to_fit(&loop->list);
+      if (status == STATUS_EOF)
         return STATUS_EOF;
       break;
     case ']':
@@ -194,6 +197,8 @@ int main(int argc, char *argv[]) {
   vector_reserve(&syntax_list, 4);
 
   read_brainf(source, &syntax_list);
+
+  vector_shink_to_fit(&syntax_list);
 
   print_syntax(&syntax_list, 0);
 

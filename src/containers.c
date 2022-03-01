@@ -18,6 +18,15 @@ void vector_reserve(vector *v, size_t capacity) {
   }
 }
 
+void vector_shink_to_fit(vector *v) {
+  if (v->start == NULL)
+    return;
+  if (v->length != v->capacity) {
+    v->start = realloc(v->start, sizeof(void *) * v->length);
+    v->capacity = v->length;
+  }
+}
+
 void vector_push(vector *v, void *item) {
   size_t wanted_capacity;
   if (v->length == v->capacity) {
