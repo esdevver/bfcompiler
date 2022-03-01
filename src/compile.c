@@ -7,7 +7,7 @@
 #include "syntax.h"
 
 void print_usage(char *program_name) {
-  fprintf(stderr,"USAGE: %s FILE\n", program_name);
+  fprintf(stderr, "USAGE: %s FILE\n", program_name);
 }
 
 typedef enum STATUS { STATUS_LOOPEND, STATUS_EOF } STATUS;
@@ -40,8 +40,7 @@ STATUS read_brainf(FILE *source, syntax_tree *syntax_list) {
       return STATUS_LOOPEND;
       break;
     case '<':
-      if (last_syntax != NULL &&
-          last_syntax->type == SYNTAX_MOVE) {
+      if (last_syntax != NULL && last_syntax->type == SYNTAX_MOVE) {
         move = (syntax_unit_count *)last_syntax;
         move->count--;
       } else {
@@ -52,8 +51,7 @@ STATUS read_brainf(FILE *source, syntax_tree *syntax_list) {
       }
       break;
     case '>':
-      if (last_syntax != NULL &&
-          last_syntax->type == SYNTAX_MOVE) {
+      if (last_syntax != NULL && last_syntax->type == SYNTAX_MOVE) {
         move = (syntax_unit_count *)last_syntax;
         move->count++;
       } else {
@@ -64,8 +62,7 @@ STATUS read_brainf(FILE *source, syntax_tree *syntax_list) {
       }
       break;
     case '-':
-      if (last_syntax != NULL &&
-          last_syntax->type == SYNTAX_ADD) {
+      if (last_syntax != NULL && last_syntax->type == SYNTAX_ADD) {
         add = (syntax_unit_count *)last_syntax;
         add->count--;
         add->count &= 0xFF;
@@ -77,8 +74,7 @@ STATUS read_brainf(FILE *source, syntax_tree *syntax_list) {
       }
       break;
     case '+':
-      if (last_syntax != NULL &&
-          last_syntax->type == SYNTAX_ADD) {
+      if (last_syntax != NULL && last_syntax->type == SYNTAX_ADD) {
         add = (syntax_unit_count *)last_syntax;
         add->count++;
         add->count &= 0xFF;
@@ -105,14 +101,14 @@ STATUS read_brainf(FILE *source, syntax_tree *syntax_list) {
 }
 
 #ifdef COLOR_OUTPUT
-#define PRETTY_SYNTAX(COLOR, SYNTAX)                                 \
+#define PRETTY_SYNTAX(COLOR, SYNTAX)                                           \
   printf("\x1b[38;5;%sm%s\x1b[0m\n", COLOR, SYNTAX)
-#define PRETTY_SYNTAX_COUNT(COLOR, SYNTAX, COUNT)                    \
-  printf("\x1b[38;5;%sm%s\x1b[0m \x1b[38;5;166m%d\x1b[0m\n", COLOR,            \
-         SYNTAX, COUNT)
+#define PRETTY_SYNTAX_COUNT(COLOR, SYNTAX, COUNT)                              \
+  printf("\x1b[38;5;%sm%s\x1b[0m \x1b[38;5;166m%d\x1b[0m\n", COLOR, SYNTAX,    \
+         COUNT)
 #else
 #define PRETTY_SYNTAX(COLOR, SYNTAX) printf("%s\n", SYNTAX)
-#define PRETTY_SYNTAX_COUNT(COLOR, SYNTAX, COUNT)                    \
+#define PRETTY_SYNTAX_COUNT(COLOR, SYNTAX, COUNT)                              \
   printf("%s %d\n", SYNTAX, COUNT)
 #endif
 
