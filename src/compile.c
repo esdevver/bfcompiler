@@ -12,7 +12,7 @@ void print_usage(char *program_name) {
 
 typedef enum STATUS { STATUS_LOOPEND, STATUS_EOF } STATUS;
 
-STATUS read_brainf(FILE *source, vector *syntax_list) {
+STATUS read_brainf(FILE *source, syntax_tree *syntax_list) {
   char c;
   syntax_unit_count *move;
   syntax_unit_count *add;
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
 
   FILE *source;
   char *error_string;
-  vector syntax_list;
+  syntax_tree syntax_list;
 
   if (argc != 2) {
     print_usage(argv[0]);

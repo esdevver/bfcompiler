@@ -32,4 +32,6 @@ typedef struct syntax_list {
   vector list;
 } syntax_unit_list;
 
+typedef vector syntax_tree;
+
 #endif
